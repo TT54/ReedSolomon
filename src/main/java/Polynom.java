@@ -95,6 +95,7 @@ public class Polynom {
             for(int i = 0; i <= k; i++){
                 somme += p1.getCoeff(i) * polynom.getCoeff(k - i);
             }
+            //ret.setCoeff(k, Math.abs(somme % 2));
             ret.setCoeff(k, somme);
         }
         return ret;
