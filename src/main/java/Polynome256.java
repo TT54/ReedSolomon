@@ -33,6 +33,22 @@ public class Polynome256 {
         }
     }
 
+    public F256 evaluate(F256 f256){
+        F256 eval = F256.getZero();
+        for(int i = 0; i < coeffs.size(); i++){
+            eval = eval.add(coeffs.get(i).multiply(f256.power(i)));
+        }
+        return eval;
+    }
+
+    public F256 getCoeffsSomme(){
+        F256 eval = F256.getZero();
+        for(int i = 0; i < coeffs.size(); i++){
+            eval = eval.add(coeffs.get(i));
+        }
+        return eval;
+    }
+
     public int getDegree(){
         this.simplify();
         return coeffs.size() - 1;
@@ -41,6 +57,16 @@ public class Polynome256 {
     public F256 getCoeff(int index){
         if(coeffs.size() <= index) return F256.getZero();
         return coeffs.get(index);
+    }
+
+    public Polynome256 derivate(){
+        Polynome256 derivated = new Polynome256(F256.getZero());
+
+        for(int i = 0; i < this.getDegree(); i++){
+            derivated.setCoeff(i, this.getCoeff(i + 1).realMultiplication(i + 1));
+        }
+
+        return derivated;
     }
 
 /*    public double evaluate(double x){
@@ -104,6 +130,12 @@ public class Polynome256 {
         return ret;
     }
 
+    /**
+     *
+     * @param p1
+     * @param polynom
+     * @return p1 - polynom
+     */
     public static Polynome256 substract(Polynome256 p1, Polynome256 polynom){
         Polynome256 ret = new Polynome256();
         for(int i = 0; i <= Math.max(p1.getDegree(), polynom.getDegree()); i++){
@@ -143,7 +175,7 @@ public class Polynome256 {
         for(int i = 0; i < this.coeffs.size(); i++){
             F256 coeff = this.getCoeff(i);
             if(!coeff.isZero()){
-                str += " + (" + coeff.toString() + ")" + ((i != 0) ? "X^" + i : "") + " ";
+                str += " + (α^" + coeff.getAlphaPower() + ")" + ((i != 0) ? "X^" + i : "") + " ";
             }
         }
         return str.isEmpty() ? "0" : str;

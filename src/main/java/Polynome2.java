@@ -102,13 +102,13 @@ public class Polynome2 {
         return ret;
     }
 
-/*    public static Polynome2 multiply(Polynome2 polynom, double k){
+    public Polynome2 multiply(boolean k){
         Polynome2 ret = new Polynome2();
-        for(int i = 0; i <= polynom.getDegree(); i++){
-            ret.setCoeff(i, polynom.getCoeff(i) * k);
+        for(int i = 0; i <= this.getDegree(); i++){
+            ret.setCoeff(i, this.getCoeff(i) && k);
         }
         return ret;
-    }*/
+    }
 
     public static Polynome2 substract(Polynome2 p1, Polynome2 polynom){
         Polynome2 ret = new Polynome2();

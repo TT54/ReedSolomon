@@ -6,6 +6,7 @@ public class F256 {
     public static final Polynome2 IDEAL = new Polynome2(true, false, true, true, true, false, false, false, true);
     public static final Map<Polynome2, F256> elementsPoly = new HashMap<>();
     public static final Map<F256, F256> inverses = new HashMap<>();
+    public static final Map<F256, Integer> alphaPowers = new HashMap<>();
     public static F256[] elements = new F256[256];
 
     public static F256 getElement(int index){
@@ -19,8 +20,8 @@ public class F256 {
     static {
         for(int i = 0; i < 256; i++){
             Polynome2 pol = new Polynome2(i % 2 == 0, i % 4 < 2, i % 8 < 4, i % 16 < 8, i % 32 < 16, i % 64 < 32, i % 128 < 64, i % 256 < 128);
-            F256 f256 = new F256(pol, i);
-            elements[i] = f256;
+            F256 f256 = new F256(pol, pol.hashCode());
+            elements[pol.hashCode()] = f256;
             elementsPoly.put(pol, f256);
         }
 
@@ -36,7 +37,15 @@ public class F256 {
             }
         }
         inverses.put(unit, unit);
-/*
+
+        F256 alpha = F256.getElement(new Polynome2(false, true));
+        F256 calculus = getUnit();
+        for(int i = 0; i < 255; i++){
+            alphaPowers.put(calculus, i);
+            calculus = calculus.multiply(alpha);
+        }
+
+        /*
         int equals = 0;
 
 
@@ -45,7 +54,7 @@ public class F256 {
 
 
     public static F256 getZero() {
-        return getElement(255);
+        return getElement(0);
     }
 
     public static F256 getUnit(){
@@ -77,12 +86,16 @@ public class F256 {
     }
 
     public boolean isZero(){
-        return this.position == 255;
+        return this.position == 0;
     }
 
     public F256 getInverse(){
         if(this.isZero()) throw new IllegalStateException("Vous ne pouvez pas inverser 0 !");
         return inverses.get(this);
+    }
+
+    public int getPosition() {
+        return position;
     }
 
     public F256 divide(F256 f256){
@@ -108,5 +121,28 @@ public class F256 {
 
     public F256 substract(F256 coeff) {
         return this.add(coeff);
+    }
+
+    public F256 power(int pow){
+        F256 f256 = F256.getUnit();
+        for(int i = 0; i < pow; i++){
+            f256 = f256.multiply(this);
+        }
+
+        return f256;
+    }
+
+    public int getAlphaPower() {
+        if (this.isZero()) /*throw new IllegalArgumentException("0 ne peut pas s'écrire comme puissance d'alpha");*/
+            return -1;
+        return alphaPowers.get(this);
+    }
+
+    public F256 realMultiplication(int number) {
+        F256 result = F256.getZero();
+        for (int i = 0; i < number; i++) {
+            result = result.add(this);
+        }
+        return result;
     }
 }
