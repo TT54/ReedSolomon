@@ -1,3 +1,8 @@
+package fr.tt54.qrcodes.reedsolomon;
+
+import fr.tt54.qrcodes.finite_fields.F256;
+import fr.tt54.qrcodes.polynoms.Polynome256;
+
 import java.util.Random;
 
 public class ReedSolomon {
@@ -20,7 +25,7 @@ public class ReedSolomon {
         time = System.currentTimeMillis();
 
         //System.out.println(toSend.getDegree());
-        //toSend.setCoeff(48, F256.getElement(5));
+        //toSend.setCoeff(48, fr.tt54.reedsolomon.finite_fields.F256.getElement(5));
         toSend.setCoeff(0, F256.getElement(8));
         toSend.setCoeff(3, F256.getElement(135));
         toSend.setCoeff(4, F256.getElement(12));

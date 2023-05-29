@@ -1,3 +1,8 @@
+package fr.tt54.qrcodes.reedsolomon;
+
+import fr.tt54.qrcodes.finite_fields.F256;
+import fr.tt54.qrcodes.polynoms.Polynome256;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -5,7 +10,7 @@ import java.util.Random;
 public class Decoder {
 
 
-    public static Polynome256 getSyndrome(Polynome256 received){
+    public static Polynome256 getSyndrome(Polynome256 received) {
         F256 alpha = F256.getAlpha();
         Polynome256 S = new Polynome256(F256.getZero());
         for(int i = 1; i <= 2 * Encoder.t; i++){
@@ -29,8 +34,8 @@ public class Decoder {
         Polynome256 L = euclide[0];
         Polynome256 w = euclide[2];
 
-        /*L = Polynome256.multiply(L, L.getCoeffDominant().getInverse());
-        w = Polynome256.multiply(w, w.getCoeffDominant().getInverse());*/
+        /*L = fr.tt54.reedsolomon.polynoms.Polynome256.multiply(L, L.getCoeffDominant().getInverse());
+        w = fr.tt54.reedsolomon.polynoms.Polynome256.multiply(w, w.getCoeffDominant().getInverse());*/
 
         List<Integer> errorPositions = new ArrayList<>();
         for (int i = 1; i < 256; i++) {
@@ -38,7 +43,7 @@ public class Decoder {
             if (eval.isZero()) {
                 errorPositions.add((256 - F256.getElement(i).getAlphaPower() - 1) % 255);
 /*
-                System.out.println(256 - F256.getElement(i).getAlphaPower() - 1);
+                System.out.println(256 - fr.tt54.reedsolomon.finite_fields.F256.getElement(i).getAlphaPower() - 1);
 */
             }
         }
@@ -56,13 +61,13 @@ public class Decoder {
 */
 
 
-
         return Polynome256.add(received, corrector);
     }
 
 
     /**
-     * Permet d'effectuer l'algorithme d'Euclide pour obtenir la relation de Bézout : a * poly1 + b * poly2 = c avec a,b,c des polynomes dans F256
+     * Permet d'effectuer l'algorithme d'Euclide pour obtenir la relation de Bézout : a * poly1 + b * poly2 = c avec a,b,c des polynomes dans fr.tt54.reedsolomon.finite_fields.F256
+     *
      * @param poly1
      * @param poly2
      * @return [a, b, c]
@@ -94,8 +99,6 @@ public class Decoder {
 
         return new Polynome256[] {v1, u1, r1};
     }
-
-
 
 
     public static boolean testEuclid(int tests, int maxPolynomeSize){

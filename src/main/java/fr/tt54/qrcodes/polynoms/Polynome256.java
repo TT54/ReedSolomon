@@ -1,3 +1,7 @@
+package fr.tt54.qrcodes.polynoms;
+
+import fr.tt54.qrcodes.finite_fields.F256;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -180,5 +184,5 @@ public class Polynome256 {
         }
         return str.isEmpty() ? "0" : str;
     }
-    
+
 }

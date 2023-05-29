@@ -1,3 +1,8 @@
+package fr.tt54.qrcodes.reedsolomon;
+
+import fr.tt54.qrcodes.finite_fields.F256;
+import fr.tt54.qrcodes.polynoms.Polynome256;
+
 public class Encoder {
 
     public static final int t = 8;
@@ -6,7 +11,7 @@ public class Encoder {
 
     static {
         generator = new Polynome256(F256.getAlpha(), F256.getUnit());
-        for(int i = 2; i <= 2 * t; i++){
+        for (int i = 2; i <= 2 * t; i++) {
             Polynome256 poly = new Polynome256(F256.getAlpha().power(i), F256.getUnit());
             generator = Polynome256.multiply(generator, poly);
         }
@@ -35,7 +40,7 @@ public class Encoder {
         Polynome256 x2t = getX2t();
         Polynome256 I = Polynome256.multiply(toTransmit, x2t);
         Polynome256 B = I.euclidDivision(getGenerator())[1];
-//        Polynome256 Q = I.euclidDivision(getGenerator())[0];
+//        fr.tt54.reedsolomon.polynoms.Polynome256 Q = I.euclidDivision(getGenerator())[0];
         return Polynome256.add(I, B);
     }
 
