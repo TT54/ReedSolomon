@@ -4,6 +4,11 @@ import fr.tt54.qrcodes.finite_fields.F256;
 import fr.tt54.qrcodes.polynoms.Polynome256;
 import fr.tt54.qrcodes.reedsolomon.ReedSolomon;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class QRCodeV1 {
@@ -47,6 +52,16 @@ public class QRCodeV1 {
         return bytes;
     }
 
+    public static int[] binaryToBytesArray(boolean[] data){
+        int[] bytes = new int[data.length / 8];
+        for(int i = 0; i < data.length / 8; i++){
+            for(int j = 0; j < 8; j++){
+                bytes[i] += data[i * 8 + j] ? Math.pow(2, 7 - j) : 0;
+            }
+        }
+        return bytes;
+    }
+
     public static int[] addErrorCorrection(int[] encodedData) {
         F256[] elements = new F256[encodedData.length];
         for (int i = 0; i < encodedData.length; i++) {
@@ -69,18 +84,156 @@ public class QRCodeV1 {
     }
 
     public static int[][] initializeMatrix() {
-        return new int[21][21];
+        int[][] matrix = new int[21][21];
+        for(int i = 0; i < matrix.length; i++){
+            for(int j = 0; j < matrix.length; j++){
+                matrix[i][j] = 0xFFFFFFFF;
+            }
+        }
+        return matrix;
+    }
+
+    public static void writeBaseMatrix(int[][] matrix){
+        int l = matrix.length;
+
+        for(int i = 0; i < 7; i++){
+            matrix[0][i] = black;
+            matrix[l - 7][i] = black;
+            matrix[0][l - 1 - i] = black;
+
+            matrix[6][i] = black;
+            matrix[l - 1][i] = black;
+            matrix[6][l - 1 - i] = black;
+        }
+
+        for(int i = 0; i < 5; i++){
+            matrix[1 + i][0] = black;
+            matrix[l - 1 - 1 - i][0] = black;
+            matrix[1 + i][l - 1] = black;
+
+            matrix[1 + i][6] = black;
+            matrix[l - 1 - 1 - i][6] = black;
+            matrix[1 + i][l - 7] = black;
+        }
+
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                matrix[2 + i][2 + j] = black;
+                matrix[l - 1 - 2 - i][2 + j] = black;
+                matrix[2 + i][l - 1 - 2 - j] = black;
+            }
+
+            matrix[l - 1 - 8 - 2 * i][4] = black;
+            matrix[4][8 + 2 * i] = black;
+        }
     }
 
     public static void encodeInfos(int[][] matrix, boolean[] datas) {
         int l = matrix.length;
 
-        matrix[l - 1][l - 1] = black;
-        matrix[l - 1][l - 2] = white;
-        matrix[l - 2][l - 1] = white;
-        matrix[l - 2][l - 2] = white;
+        for(int i = 0; i < datas.length / 8; i++){
+            for(int j = 0; j < 8; j++){
+                boolean data = datas[i * 8 + j];
 
-        
+                if(i < 12){
+                    int row = (i % 3) * 4 + (j/2);
+                    int column = (i / 3) * 2 + (j % 2);
+
+                    matrix[l - 1 - row][l - 1 - column] = data ? white : black;
+                } else if(i < 22){
+                    int row = ((i - 12) % 5) * 4 + (j/2);
+                    if((i - 12) % 5 == 4)
+                        row += 1;
+
+                    int column = ((i - 12) / 5) * 2 + (j % 2) + 8;
+
+                    matrix[l - 1 - row][l - 1 - column] = data ? white : black;
+                } else if(i < 24){
+                    int row = 8 + j / 2;
+                    int column = 12 + (i - 22) * 2 + (j%2);
+
+                    matrix[l - 1 - row][l - 1 - column] = data ? white : black;
+                } else if(i < 26){
+                    int row = 8 + j / 2;
+                    int column = 17 + (i - 24) * 2 + (j%2);
+
+                    matrix[l - 1 - row][l - 1 - column] = data ? white : black;
+                }
+            }
+        }
+    }
+
+
+
+    public static void generateImage(int[][] matrix){
+        try {
+            BufferedImage image = new BufferedImage(matrix.length, matrix.length, BufferedImage.TYPE_INT_RGB);
+            for(int i=0; i<matrix.length; i++) {
+                for(int j=0; j< matrix.length; j++) {
+                    int a = matrix[i][j];
+                    Color newColor = new Color(a);
+                    //Color newColor = a == 0xFFFFFFFF ? Color.WHITE : Color.BLACK;
+                    //newColor = a != -10 ? Color.WHITE : Color.BLACK;
+                    image.setRGB(j,i,newColor.getRGB());
+                }
+            }
+            File output = new File("GrayScale.png");
+            ImageIO.write(image, "png", output);
+        }
+
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static boolean[] readQRCode(int[][] matrix){
+        int l = matrix.length;
+        boolean[] datas = new boolean[26 * 8];
+
+        for(int i = 0; i < 26; i++){
+            for(int j = 0; j < 8; j++){
+                if(i < 12){
+                    int row = (i % 3) * 4 + (j/2);
+                    int column = (i / 3) * 2 + (j % 2);
+
+                    datas[i * 8 + j] = matrix[l - 1 - row][l - 1 - column] == white;
+                } else if(i < 22){
+                    int row = ((i - 12) % 5) * 4 + (j/2);
+                    if((i - 12) % 5 == 4)
+                        row += 1;
+
+                    int column = ((i - 12) / 5) * 2 + (j % 2) + 8;
+
+                    datas[i * 8 + j] = matrix[l - 1 - row][l - 1 - column] == white;
+                } else if(i < 24){
+                    int row = 8 + j / 2;
+                    int column = 12 + (i - 22) * 2 + (j%2);
+
+                    datas[i * 8 + j] = matrix[l - 1 - row][l - 1 - column] == white;
+                } else if(i < 26){
+                    int row = 8 + j / 2;
+                    int column = 17 + (i - 24) * 2 + (j%2);
+
+                    datas[i * 8 + j] = matrix[l - 1 - row][l - 1 - column] == white;
+                }
+            }
+        }
+
+        return datas;
+    }
+
+    public static int[][] getMatrixFromImage(String imageName) throws IOException {
+        BufferedImage img=ImageIO.read(new File(imageName));
+        int pix[][]= new int[img.getHeight()][img.getWidth()];
+
+        for(int i = 0; i < pix.length; i++){
+            for(int j = 0; j < pix[i].length; j++){
+                pix[i][j] = img.getRGB(j, i);
+            }
+        }
+
+        return pix;
     }
 
 }
