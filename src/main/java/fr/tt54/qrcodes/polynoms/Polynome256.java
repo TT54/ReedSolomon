@@ -1,3 +1,7 @@
+package fr.tt54.qrcodes.polynoms;
+
+import fr.tt54.qrcodes.finite_fields.F256;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +67,7 @@ public class Polynome256 {
         Polynome256 derivated = new Polynome256(F256.getZero());
 
         for(int i = 0; i < this.getDegree(); i++){
-            derivated.setCoeff(i, F256.getElement(this.getCoeff(i+1).getPolynome().multiply((i + 1) % 2 == 1)));
+            derivated.setCoeff(i, this.getCoeff(i + 1).realMultiplication(i + 1));
         }
 
         return derivated;
@@ -180,5 +184,5 @@ public class Polynome256 {
         }
         return str.isEmpty() ? "0" : str;
     }
-    
+
 }
