@@ -1,6 +1,7 @@
 package fr.tt54.qrcodes.reedsolomon;
 
 import fr.tt54.qrcodes.finite_fields.F256;
+import fr.tt54.qrcodes.polynoms.Polynome2;
 import fr.tt54.qrcodes.polynoms.Polynome256;
 
 import java.util.Random;
@@ -77,6 +78,46 @@ public class ReedSolomon {
 
     public static Polynome256 decode(Polynome256 received) {
         return Decoder.decode(received);
+    }
+
+    public static F256 getF256FromByte(int b) {
+        return F256.getElement(new Polynome2((b & 0b1) != 0, (b & 0b10) != 0, (b & 0b100) != 0, (b & 0b1000) != 0, (b & 0b10000) != 0, (b & 0b100000) != 0, (b & 0b1000000) != 0, (b & 0b10000000) != 0));
+    }
+
+    public static int getByteFromF256(F256 f256) {
+        int b = 0;
+        Polynome2 poly = f256.getPolynome();
+        for (int i = 0; i <= poly.getDegree(); i++) {
+            if (poly.getCoeff(i)) {
+                b += Math.pow(2, i);
+            }
+        }
+        return b;
+    }
+
+
+    public static Polynome256 getPolynomeFromBytes(int[] bytes) {
+        Polynome256 poly = new Polynome256(F256.getZero());
+        for (int i = 0; i < bytes.length; i++) {
+            poly.setCoeff(i, getF256FromByte(bytes[i]));
+        }
+        return poly;
+    }
+
+    public static int[] getBytesFromPolynome(Polynome256 poly) {
+        int[] bytes = new int[poly.getDegree() + 1];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = getByteFromF256(poly.getCoeff(i));
+        }
+        return bytes;
+    }
+
+    public static int[] encodeBytes(int[] bytes) {
+        return getBytesFromPolynome(encode(getPolynomeFromBytes(bytes)));
+    }
+
+    public static int[] decodeBytes(int[] bytes) {
+        return getBytesFromPolynome(decode(getPolynomeFromBytes(bytes)));
     }
 
 }

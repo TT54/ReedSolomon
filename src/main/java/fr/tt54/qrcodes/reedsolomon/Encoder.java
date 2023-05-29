@@ -5,7 +5,7 @@ import fr.tt54.qrcodes.polynoms.Polynome256;
 
 public class Encoder {
 
-    public static final int t = 8;
+    public static int t = 8;
 
     private static Polynome256 generator;
 
@@ -40,7 +40,6 @@ public class Encoder {
         Polynome256 x2t = getX2t();
         Polynome256 I = Polynome256.multiply(toTransmit, x2t);
         Polynome256 B = I.euclidDivision(getGenerator())[1];
-//        fr.tt54.reedsolomon.polynoms.Polynome256 Q = I.euclidDivision(getGenerator())[0];
         return Polynome256.add(I, B);
     }
 
