@@ -18,7 +18,16 @@ public class Encoder {
     }
 
 
+/*    public static Polynome256 getGenerator(){
+        return generator;
+    }*/
+
     public static Polynome256 getGenerator(){
+        generator = new Polynome256(F256.getAlpha(), F256.getUnit());
+        for (int i = 2; i <= 2 * t; i++) {
+            Polynome256 poly = new Polynome256(F256.getAlpha().power(i), F256.getUnit());
+            generator = Polynome256.multiply(generator, poly);
+        }
         return generator;
     }
 

@@ -1,5 +1,7 @@
 package fr.tt54.qrcodes;
 
+import fr.tt54.qrcodes.finite_fields.F256;
+import fr.tt54.qrcodes.polynoms.Polynome256;
 import fr.tt54.qrcodes.reedsolomon.ReedSolomon;
 
 import java.io.IOException;
@@ -8,8 +10,15 @@ import java.util.Arrays;
 public class Main {
 
     public static void main(String[] args) {
-        //launchTest(10);
+        ReedSolomon.encode(new Polynome256(F256.getAlpha()));
+        System.out.println("starting at " + System.currentTimeMillis());
+        DataStudy.evaluateComplexityDatas(1, 200, 8, 8, 20);
+        //DataStudy.calculateComplexityOfT(200, 1, 50, 50, true);
+    }
 
+
+
+    public static void launchTest2(){
         int[] message = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
         int[] toSend = ReedSolomon.encodeBytes(message);
@@ -51,7 +60,6 @@ public class Main {
             throw new RuntimeException(e);
         }
     }
-
 
     public static void launchTest(int testsAmount) {
         boolean success = true;

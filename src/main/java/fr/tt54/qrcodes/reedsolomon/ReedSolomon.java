@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class ReedSolomon {
 
-    private static final Random random = new Random();
+    public static final Random random = new Random();
 
     public static void test() {
         long time = 0;
