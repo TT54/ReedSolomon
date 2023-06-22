@@ -12,8 +12,11 @@ public class Main {
     public static void main(String[] args) {
         ReedSolomon.encode(new Polynome256(F256.getAlpha()));
         System.out.println("starting at " + System.currentTimeMillis());
-        DataStudy.evaluateComplexityDatas(1, 200, 8, 8, 20);
+        DataStudy.evaluateComplexityDatas(1, 2000, 8, 8, 1);
         //DataStudy.calculateComplexityOfT(200, 1, 50, 50, true);
+        //DataStudy.partialComplexityDatas(1, 1001, 8, 1, 4);
+
+        //DataStudy.evaluateComplexityDatas(1, 200, 8, 8, 20);
     }
 
 

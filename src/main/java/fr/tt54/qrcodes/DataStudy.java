@@ -10,7 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DataStudy {
@@ -151,6 +153,142 @@ public class DataStudy {
             fileWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void partialComplexityDatas(int minDataSize, int maxDataSize, int t, int tries, int dataCalculatedModulo){
+        List<Integer> sizes = new ArrayList<>();
+
+        for(int i = minDataSize; i <= maxDataSize; i += dataCalculatedModulo){
+            sizes.add(i);
+        }
+
+        File outFile = new File("D:\\Theo\\Cours\\Tipe\\Maths\\complexity_datas" + "_" + System.currentTimeMillis() + "_size=" + minDataSize + "," + maxDataSize + "_t=" + t + "," + t + ".csv");
+        outFile.getParentFile().mkdirs();
+
+        try {
+            FileWriter fileWriter = new FileWriter(outFile, StandardCharsets.UTF_16);
+
+            fileWriter.write("t,taille des données,nombre d'essais,temps moyen (en ms),temps total (en ms)");
+            fileWriter.write("\n");
+
+            for (int size : sizes) {
+                long timeElapsed = calculateTimeForPolynomialsGeneration(size, t, tries);
+
+                fileWriter.write(t + "," + size + "," + tries + "," + (timeElapsed / tries) + "," + timeElapsed);
+                fileWriter.write("\n");
+
+                if(((int) (((double) (size - minDataSize) / (maxDataSize - minDataSize)) * 100)) % 10 == 0) {
+                    System.out.println(format.format((double) (size - minDataSize) / (maxDataSize - minDataSize)));
+                }
+            }
+
+            fileWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+
+    public static class SavingThread extends Thread{
+
+        private final List<StudyThread> threads;
+        private final Map<Integer, Long> durationPerSize;
+        private final int durationAmount;
+        private final int tries;
+
+        public SavingThread(List<StudyThread> threads, Map<Integer, Long> durationPerSize, int durationAmount, int tries) {
+            this.threads = threads;
+            this.durationPerSize = durationPerSize;
+            this.durationAmount = durationAmount;
+            this.tries = tries;
+        }
+
+        @Override
+        public void run() {
+            while (stillThreadsAlive()){
+                try {
+                    //System.out.println("threads alive");
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+
+            System.out.println("threads dead");
+
+            if(durationPerSize.size() != durationAmount){
+                System.out.println("Il manque des durées !!!!!");
+            }
+
+            try {
+                saveDatas();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void saveDatas() throws IOException {
+            File outFile = new File("D:\\Theo\\Cours\\Tipe\\Maths\\complexity_datas" + "_" + System.currentTimeMillis() + "_size=" + "unknown" + "_t=" + Encoder.t + "," + Encoder.t + ".csv");
+            outFile.getParentFile().mkdirs();
+
+            FileWriter fileWriter = new FileWriter(outFile, StandardCharsets.UTF_16);
+
+            fileWriter.write("t,taille des données,nombre d'essais,temps moyen (en ms),temps total (en ms)");
+            fileWriter.write("\n");
+
+            for(Map.Entry<Integer, Long> entry : this.durationPerSize.entrySet()){
+                long timeElapsed = entry.getValue();
+                fileWriter.write(Encoder.t + "," + entry.getKey() + "," + tries + "," + (timeElapsed / tries) + "," + timeElapsed);
+                fileWriter.write("\n");
+            }
+
+            fileWriter.close();
+        }
+
+        private boolean stillThreadsAlive(){
+            for(StudyThread thread : threads){
+                if(thread.isAlive()){
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+
+    public static class StudyThread extends Thread{
+
+        private final int id;
+        private final int[] dataSizeValues;
+        private final int tries;
+
+        private final Map<Integer, Long> durationPerSize;
+
+        public StudyThread(int id, int[] dataSizeValues, int tries, Map<Integer, Long> durationPerSize) {
+            this.id = id;
+            this.dataSizeValues = dataSizeValues;
+            this.tries = tries;
+            this.durationPerSize = durationPerSize;
+        }
+
+        @Override
+        public void run() {
+            int count = 0;
+            for (int size : dataSizeValues) {
+                long timeElapsed = calculateTimeForPolynomialsGeneration(size, Encoder.t, tries);
+
+                durationPerSize.put(size, timeElapsed);
+
+                if(count % (dataSizeValues.length / 10) == 0){
+                    System.out.println(format.format(count / (double) dataSizeValues.length));
+                    System.out.println("Thread id " + id + " - taille des polynomes " + size);
+                }
+                count++;
+            }
         }
     }
 }
